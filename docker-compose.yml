@@ -1,0 +1,33 @@
+services:
+  database:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: "some-password"
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    expose:
+      - 5432
+  backend:
+    build:
+      context: backend
+    environment:
+      DATABASE_HOST: database
+      DATABASE_USER: postgres
+      DATABASE_NAME: postgres
+      DATABASE_PASSWORD: some-password
+      PORT: 443
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3000:443"
+    command: ["npm", "start"]
+    depends_on:
+      - database
+  frontend:
+    image: nginx:latest
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
